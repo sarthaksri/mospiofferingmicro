@@ -426,7 +426,7 @@
   color: #94a3b8;
 }
 
-.esk-code-body {
+.esk-page .esk-code-body {
   padding: 20px 24px;
   overflow-x: auto;
   font-family: var(--esk-mono);
@@ -438,7 +438,7 @@
   animation: eskCodeFadeIn 0.4s ease-out forwards;
 }
 
-.esk-code-body code {
+.esk-page .esk-code-body code {
   font-size: inherit;
   color: inherit;
   white-space: pre;
