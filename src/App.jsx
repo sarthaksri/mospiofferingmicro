@@ -70,6 +70,7 @@ function App() {
   const [copiedInstall, setCopiedInstall] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [activeExample, setActiveExample] = useState(0);
 
   const copyInstall = () => {
     navigator.clipboard.writeText("pip install mospi-unitdata");
@@ -115,24 +116,26 @@ function App() {
 5. Generate or copy your API key`,
     },
     {
-      label: "Import and download",
-      desc: "Pass a local folder and your API key",
-      code: `from MospiUnitdata import getDatasets
+      label: "List datasets",
+      desc: "Browse or search datasets with pagination",
+      code: `from mospi_unitdata import list_datasets
 
-getDatasets(
-    "C:/data/mospi-unitdata",
-    "YOUR_API_KEY",
-)`,
+# Browse all datasets
+datasets = list_datasets("YOUR_API_KEY", page=1)
+
+# Search by keyword
+results = list_datasets("YOUR_API_KEY", query="industries")`,
     },
     {
-      label: "Choose a survey",
-      desc: "Browse pages, pick an id, and fetch all files",
-      code: `277:Annual Survey of Industries 2019-20
-275:Annual Survey of Industries 2020-21
-256:Annual Survey of Industries 2023-24
-...
-Total pages:13, Page:1 of 13,
-Enter Survey index number (put n to Navigate to Next Page):`,
+      label: "Download",
+      desc: "Fetch individual files or entire datasets",
+      code: `from mospi_unitdata import download_dataset, download_file
+
+# Download all files in a dataset
+download_dataset(256, "C:/data/mospi", "YOUR_API_KEY")
+
+# Or download a single file
+download_file(256, "data.csv", "C:/data/mospi", "YOUR_API_KEY")`,
     },
   ];
 
@@ -143,19 +146,19 @@ Enter Survey index number (put n to Navigate to Next Page):`,
     },
     {
       title: "Authenticate with API key",
-      desc: "Generate your key from the Unitdata Portal profile page and pass it directly to the package.",
+      desc: "Generate your key from the Unitdata Portal profile page and pass it directly to any function.",
     },
     {
-      title: "Browse surveys interactively",
-      desc: "Step through dataset pages in the terminal before selecting a survey id to download.",
+      title: "Search and browse datasets",
+      desc: "Use `list_datasets()` with optional keyword search and pagination to find what you need.",
     },
     {
-      title: "Download to local folder",
-      desc: "Provide a target path and the client saves each file from the selected survey there.",
+      title: "Selective or batch download",
+      desc: "Download individual files with `download_file()` or entire datasets with `download_dataset()`.",
     },
     {
-      title: "Single public function",
-      desc: "The documented entry point is `getDatasets(folderPath, apiKey)`.",
+      title: "Clean, modular API",
+      desc: "Five focused functions: `list_datasets`, `list_files`, `download_file`, `download_dataset`, and legacy `getDatasets`.",
     },
     {
       title: "Portal-backed files",
@@ -163,22 +166,79 @@ Enter Survey index number (put n to Navigate to Next Page):`,
     },
   ];
 
-  const inputCode = `from MospiUnitdata import getDatasets
+  const examples = [
+    {
+      name: "list_datasets",
+      desc: "Browse or search datasets with pagination",
+      input: `from mospi_unitdata import list_datasets
 
-save_path = "C:/Users/you/Downloads/mospi-data"
-api_key = "YOUR_API_KEY"
+# Browse all datasets (page 1)
+datasets = list_datasets("YOUR_API_KEY", page=1)
 
-getDatasets(save_path, api_key)`;
+# Search by keyword
+results = list_datasets("YOUR_API_KEY", query="industries")`,
+      output: `[
+  {"id": 277, "title": "Annual Survey of Industries 2019-20"},
+  {"id": 275, "title": "Annual Survey of Industries 2020-21"},
+  {"id": 256, "title": "Annual Survey of Industries 2023-24"},
+  ...
+]`,
+    },
+    {
+      name: "list_files",
+      desc: "View available files in a dataset",
+      input: `from mospi_unitdata import list_files
 
-  const outputCode = `277:Annual Survey of Industries 2019-20
+files = list_files(256, "YOUR_API_KEY")`,
+      output: `[
+  {"file_name": "ASI_2023-24_data.zip", "size": "12.4 MB"},
+  {"file_name": "ASI_2023-24_documentation.pdf", "size": "1.2 MB"},
+  ...
+]`,
+    },
+    {
+      name: "download_file",
+      desc: "Download a single file from a dataset",
+      input: `from mospi_unitdata import download_file
+
+download_file(
+    256,
+    "ASI_2023-24_data.zip",
+    "C:/Users/you/Downloads/mospi-data",
+    "YOUR_API_KEY"
+)`,
+      output: `C:/Users/you/Downloads/mospi-data/ASI_2023-24_data.zip: Downloaded successfully!`,
+    },
+    {
+      name: "download_dataset",
+      desc: "Batch download all files in a dataset",
+      input: `from mospi_unitdata import download_dataset
+
+download_dataset(
+    256,
+    "C:/Users/you/Downloads/mospi-data",
+    "YOUR_API_KEY"
+)`,
+      output: `C:/Users/you/Downloads/mospi-data/ASI_2023-24_data.zip: Downloaded successfully!
+C:/Users/you/Downloads/mospi-data/ASI_2023-24_documentation.pdf: Downloaded successfully!`,
+    },
+    {
+      name: "getDatasets",
+      desc: "Interactive legacy mode for terminal browsing",
+      input: `from mospi_unitdata import getDatasets
+
+getDatasets(
+    "C:/Users/you/Downloads/mospi-data",
+    "YOUR_API_KEY"
+)`,
+      output: `277:Annual Survey of Industries 2019-20
 275:Annual Survey of Industries 2020-21
 256:Annual Survey of Industries 2023-24
 ...
 Total pages:13, Page:1 of 13,
-Enter Survey index number (put n to Navigate to Next Page): 256
-
-C:/Users/you/Downloads/mospi-data/file_1.zip: Downloaded successfully!
-C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
+Enter Survey index number (put n to Navigate to Next Page):`,
+    },
+  ];
 
   return (
     <div className="udt-page">
@@ -196,7 +256,7 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
                 </span>
               </h1>
               <p className="udt-hero-desc">
-                Browse portal datasets interactively and download survey files from
+                Search, browse, and download microdata datasets from
                 <code>https://microdata.gov.in</code>
               </p>
               <div className="udt-install-row">
@@ -248,8 +308,8 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
         <div className="udt-container">
           <h2 className="udt-section-title">Quick Start</h2>
           <p className="udt-section-desc">
-            The package follows a short portal-driven workflow: install, generate an API key,
-            call <code>getDatasets()</code>, then choose the survey id you want to download.
+            Install the package, generate an API key, then use the modular API to search datasets
+            and download files programmatically.
           </p>
           <div className="udt-quickstart-cta">
             <a
@@ -313,8 +373,8 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
         <div className="udt-container">
           <h2 className="udt-section-title">Why Use It</h2>
           <p className="udt-section-desc">
-            A small wrapper around the official portal workflow: authenticate, browse, choose a survey,
-            and download the files you need.
+            A clean Python API over the official MoSPI Microdata Portal: search, browse, and download
+            datasets with just a few function calls.
           </p>
           <div className="udt-dataset-grid">
             {highlights.map((item) => (
@@ -330,11 +390,23 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
 
       <section className="udt-section udt-examples-section ani">
         <div className="udt-container">
-          <h2 className="udt-section-title">Example</h2>
+          <h2 className="udt-section-title">API Reference</h2>
           <p className="udt-section-desc">
-            The input code and terminal output are shown separately so the interactive flow is easier to scan.
+            Five functions covering the full workflow - from browsing datasets to downloading files.
           </p>
-          <div className="udt-example-grid">
+          <div className="udt-example-tabs">
+            {examples.map((ex, i) => (
+              <button
+                key={ex.name}
+                className={`udt-example-tab ${activeExample === i ? "active" : ""}`}
+                onClick={() => setActiveExample(i)}
+              >
+                <code>{ex.name}</code>
+                <span>{ex.desc}</span>
+              </button>
+            ))}
+          </div>
+          <div className="udt-example-grid" key={activeExample}>
             <div className="udt-example-panel">
               <div className="udt-example-label udt-example-label-input">Input</div>
               <div className="udt-code-block">
@@ -344,10 +416,10 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
                     <span />
                     <span />
                   </div>
-                  <span className="udt-code-filename">input.py</span>
+                  <span className="udt-code-filename">{examples[activeExample].name}.py</span>
                 </div>
                 <pre className="udt-code-body">
-                  <code>{inputCode}</code>
+                  <code>{examples[activeExample].input}</code>
                 </pre>
               </div>
             </div>
@@ -363,7 +435,7 @@ C:/Users/you/Downloads/mospi-data/file_2.pdf: Downloaded successfully!`;
                   <span className="udt-code-filename">output.txt</span>
                 </div>
                 <pre className="udt-code-body udt-code-body-output">
-                  <code>{outputCode}</code>
+                  <code>{examples[activeExample].output}</code>
                 </pre>
               </div>
             </div>

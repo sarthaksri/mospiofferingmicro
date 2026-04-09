@@ -631,12 +631,63 @@
   line-height: 1.5;
 }
 
+.udt-example-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.udt-example-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  background: var(--udt-white);
+  border: 1px solid var(--udt-gray-200);
+  border-radius: var(--udt-radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-family: var(--udt-font);
+}
+
+.udt-example-tab:hover {
+  border-color: var(--udt-gray-400);
+  background: var(--udt-gray-100);
+}
+
+.udt-example-tab.active {
+  border-color: var(--udt-primary-blue);
+  background: rgba(20, 42, 84, 0.06);
+}
+
+.udt-example-tab code {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--udt-primary-blue);
+}
+
+.udt-example-tab span {
+  font-size: 11px;
+  color: var(--udt-gray-500);
+}
+
+.udt-example-tab.active span {
+  color: var(--udt-gray-700);
+}
+
 .udt-example-grid {
   display: flex;
   flex-direction: column;
   gap: 18px;
   max-width: 980px;
   margin: 0 auto;
+  animation: udtCodeFadeIn 0.4s ease-out forwards;
 }
 
 .udt-example-panel {
@@ -816,6 +867,14 @@
 
   .udt-carousel-tab {
     min-height: auto;
+  }
+
+  .udt-example-tabs {
+    flex-direction: column;
+  }
+
+  .udt-example-tab span {
+    display: none;
   }
 }
 
